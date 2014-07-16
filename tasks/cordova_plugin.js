@@ -34,14 +34,19 @@ module.exports = function (grunt) {
 
     grunt.log.writeln('Installing Cordova plugins:');
     async.eachSeries(options.plugins, function (pluginID, nextPlugin) {
-      if (!grunt.file.exists(options.buildFolder + 'plugins/' + pluginID)) {
-        grunt.log.writeln('  ' + pluginID);
+      var folder = pluginID, url = pluginID;
+      if (typeof(pluginID) === 'object') {
+        folder = pluginID.name;
+        url = pluginID.url;
+      }
+      if (!grunt.file.exists(options.buildFolder + 'plugins/' + folder)) {
+        grunt.log.writeln('  ' + folder);
         grunt.util.spawn({
           cmd: options.cordovaPath + 'cordova',
           opts: {
             cwd: options.buildFolder
           },
-          args: ['plugin', 'add', pluginID]
+          args: ['plugin', 'add', url]
         }, function (error, result, code) {
           if (error) {
             grunt.fail.warn('Cordova plugin install failed: ' + error, code);
@@ -52,7 +57,7 @@ module.exports = function (grunt) {
           }
         });
       } else {
-        grunt.log.writeln('  ' + pluginID + ' (skipped)');
+        grunt.log.writeln('  ' + folder + ' (skipped)');
         nextPlugin();
       }
     }, function () {
